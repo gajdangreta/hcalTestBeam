@@ -1,6 +1,6 @@
-# Filename: event_selections.py
+# Filename: pulsed_event_selections.py
 # Author: Gréta Gajdán 
-# Created: 2024-10-10
+# Created: 2024-10-25
 
 import numpy as np
 import pandas as pd
