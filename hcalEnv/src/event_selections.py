@@ -4,6 +4,7 @@
 
 import numpy as np
 import pandas as pd
+import scipy.signal as sig
 
 def choose_bar(df,layer, strip):
     df=df[df["strip"]==strip]
@@ -116,3 +117,69 @@ def import_and_select(calibration_folder, data_folder, run_n, cut_first_layer=Tr
     pedestals, mips, run=import_data(calibration_folder, data_folder, run_n)
     run=select_events(run, pedestals, mips,  cut_first_layer, cut_back_layers, use_sigma,back_layers)
     return run
+
+#from Axel Helgstrand
+def select_faulty_data(data_df, pedestal_df, spike_filter=True, late_trigger_filter=True):
+    # loop through all events in the dataframe
+    print('filtering faulty events...')
+    faulty_data_indecies = []
+    for index, row in data_df.iterrows():
+
+        # extract the pulse shape for the event
+        end0 = []
+        end1 = []
+
+        for j in range(8):
+
+            adc_end0_col = f'adc_{j}_end0'
+            adc_end1_col = f'adc_{j}_end1'
+
+            if adc_end0_col not in row or adc_end1_col not in row:
+                print(f"Columns '{adc_end0_col}' or '{adc_end1_col}' do not exist in event {row['pf_event']}, skipping")
+                continue
+
+            end0_val = row[adc_end0_col]
+            end1_val = row[adc_end1_col]
+
+            if np.isnan(end0_val) or np.isnan(end1_val):
+                print(f"NaN value found in '{adc_end0_col}' or '{adc_end1_col}' for event {row['pf_event']}, skipping")
+                continue
+
+            end0.append(end0_val)
+            end1.append(end1_val)
+
+        end0 = np.array(end0)
+        end1 = np.array(end1)
+        ends = [end0, end1]
+
+        # check the pulse shape
+        for end in ends:
+            if spike_filter:
+                # Check for spikes in data
+                # TODO: change threshold to be dependent on the channel pedestal standard deviation.
+                peaks, _ = sig.find_peaks((end * -1 + max(end)), prominence=1.5, threshold=10)
+                if len(peaks) >= 1:
+
+                    if index not in faulty_data_indecies:
+                        faulty_data_indecies.append(index)
+                        """plt.plot(end)
+                        print('peaks: ', peaks)
+                        plt.plot(peaks, np.array(end)[peaks.astype(int)], "x")
+                        plt.show()"""
+
+            # check for late triggers in data
+            # TODO: this filters away to many good events, make stricter criteria.
+            if late_trigger_filter:
+
+                tolerance = 0.2
+                if end[-1] >= (end[0] + max(end) * tolerance) or (end[-1] <= end[0] - max(end) * tolerance):
+
+                    tolerance = 0.1
+                    if end[1] <= (end[0] + end[0] * tolerance) and end[1] >= (end[0] - end[0] * tolerance):
+                        if end[2] <= (end[0] + end[0] * tolerance) and end[2] >= (end[0] - end[0] * tolerance):
+
+                            if index not in faulty_data_indecies:
+                                faulty_data_indecies.append(index)
+
+    print('number of faulty events: ', len(faulty_data_indecies))
+    return faulty_data_indecies, len(faulty_data_indecies)
