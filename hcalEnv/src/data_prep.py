@@ -1,4 +1,4 @@
-# Filename: event_selections.py
+# Filename: data_prep.py
 # Author: Gréta Gajdán 
 # Created: 2025-01-03
 
