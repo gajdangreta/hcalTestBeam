@@ -24,7 +24,7 @@ def longitudinal_profile(run_df, run_number, plot_folder, save_plot=False):
     plt.xticks(np.arange(1,20))
     plt.legend()
     plt.xlabel("Layer", fontsize=12.5)
-    plt.ylabel("Reconstructed energy [MeV]", fontsize=12.5)
+    plt.ylabel("Deposited energy [MeV]", fontsize=12.5)
     plt.title("Run "+str(run_number), fontsize=15)
     
     if save_plot==True:
@@ -52,7 +52,7 @@ def transverse_profile(run_df,plot_folder, save_plot=False):
             plt.ylim(5e-4,y_max+1)
             plt.yscale('log')
             plt.xlabel("Bar", fontsize=12.5)
-            plt.ylabel("Reconstructed energy [MeV]", fontsize=12.5)
+            plt.ylabel("Deposited energy [MeV]", fontsize=12.5)
             plt.title("Layer "+str(l), fontsize=15)
             if save_plot==True:
                 Path(plot_folder+"transverse_profile").mkdir(parents=True, exist_ok=True)
