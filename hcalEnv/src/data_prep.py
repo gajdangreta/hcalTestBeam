@@ -50,7 +50,7 @@ def subtract_pedestals(df, is_it_pulsed=False):
     
     return df
 
-def convert_mip_to_MeV(run_df,mip_df, is_it_pulsed):
+def convert_to_MeV(run_df,mip_df, is_it_pulsed):
     # converts all ADCs to MeV
     merged_df=run_df.merge(mip_df, how='left', on=['layer','strip'])
 

@@ -42,25 +42,26 @@ def transverse_profile(run_df,plot_folder, save_plot=False):
     y_max=strip_sum.max(axis=None)
     
     for l in range(1,20):
-        helper_df=strip_sum.xs(l, level=0, axis=0, drop_level=True)
-        
-        plt.bar(helper_df.index-0.2, helper_df["adc_sum_end0"], color="magenta", alpha=0.5, edgecolor="magenta", label="end_0", width=0.4)
-        plt.bar(helper_df.index+0.2, helper_df["adc_sum_end1"], color="blue", alpha=0.5, edgecolor="blue", label="end_1", width=0.4)
-        plt.legend()
-        plt.xticks(helper_df.index)
-        plt.ylim(5e-4,y_max+1)
-        plt.yscale('log')
-        plt.xlabel("Bar", fontsize=12.5)
-        plt.ylabel("Reconstructed energy [MeV]", fontsize=12.5)
-        plt.title("Layer "+str(l), fontsize=15)
-        if save_plot==True:
-            Path(plot_folder+"transverse_profile").mkdir(parents=True, exist_ok=True)
-            plt.savefig(plot_folder+"transverse_profile/transverse_layer_"+str(l)+".png", bbox_inches='tight')
-        plt.show()
+        if l in run_df['layer'].values:
+            helper_df=strip_sum.xs(l, level=0, axis=0, drop_level=True)
+            
+            plt.bar(helper_df.index-0.2, helper_df["adc_sum_end0"], color="magenta", alpha=0.5, edgecolor="magenta", label="end_0", width=0.4)
+            plt.bar(helper_df.index+0.2, helper_df["adc_sum_end1"], color="blue", alpha=0.5, edgecolor="blue", label="end_1", width=0.4)
+            plt.legend()
+            plt.xticks(helper_df.index)
+            plt.ylim(5e-4,y_max+1)
+            plt.yscale('log')
+            plt.xlabel("Bar", fontsize=12.5)
+            plt.ylabel("Reconstructed energy [MeV]", fontsize=12.5)
+            plt.title("Layer "+str(l), fontsize=15)
+            if save_plot==True:
+                Path(plot_folder+"transverse_profile").mkdir(parents=True, exist_ok=True)
+                plt.savefig(plot_folder+"transverse_profile/transverse_layer_"+str(l)+".png", bbox_inches='tight')
+            plt.show()
 
 def make_shower_profiles(run_df, mip_df, run_number, plot_folder):
     # generate and save both transverse and longitudinal shower profiles of a run
-    run_df=convert_mip_to_MeV(run_df, mip_df, is_it_pulsed=False)
+    run_df=convert_to_MeV(run_df, mip_df, is_it_pulsed=False)
     longitudinal_profile(run_df,run_number,plot_folder, save_plot=True)
     transverse_profile(run_df,plot_folder, True)
     return
