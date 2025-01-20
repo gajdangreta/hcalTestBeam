@@ -9,3 +9,6 @@ def gaussian(x, mu, sig, A):
 
 def linear(x,a,b):
     return a*x+b
+
+def hyperbolic(x,a,b):
+    return a/x+b
