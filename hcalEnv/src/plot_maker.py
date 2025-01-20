@@ -6,10 +6,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+from scipy.optimize import curve_fit
 import sys
 sys.path.append("../src")
 
 from data_prep import *
+from fitting_functions import *
 
 def longitudinal_profile(run_df, run_number, plot_folder, save_plot=False):
     # generate the longitudinal shower profile of a run. 
@@ -65,3 +67,39 @@ def make_shower_profiles(run_df, mip_df, run_number, plot_folder):
     longitudinal_profile(run_df,run_number,plot_folder, save_plot=True)
     transverse_profile(run_df,plot_folder, True)
     return
+
+def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=False):
+    run_df=convert_to_MeV(run_df,mip_df, False)
+    grouped_df=run_df.groupby(['pf_event']).sum()[['adc_sum_end0', 'adc_sum_end1']]
+
+    h0, bins=np.histogram(grouped_df["adc_sum_end0"], bins=20)
+    h1, _=np.histogram(grouped_df["adc_sum_end1"], bins=bins)
+
+    idx_max = list(h0).index(max(h0))
+    mu_p0=bins[idx_max]
+
+    bin_fit=(bins[:-1] + bins[1:]) / 2
+    
+    param0, _=curve_fit(gaussian,bin_fit, h0, p0=[mu_p0, 100,6000])
+    param1, _=curve_fit(gaussian,bin_fit, h1, p0=[mu_p0, 100,6000])
+
+    #plt.bar(bins[:-1]-1.4, h0,width=2.4, align="edge", color="magenta", edgecolor="magenta", alpha=0.5, label="end_0")
+    #plt.bar(bins[:-1]+1.4, h1,width=2.4, align="edge", color="blue", edgecolor="blue", alpha=0.5, label="end_1")
+    plt.hist(grouped_df, bins=20,color=["magenta", "blue"], edgecolor="black", alpha=0.5, label=["end_0", "end_1"])
+    
+    plt.plot(np.linspace(bins[0], bins[-2], 1000), gaussian(np.linspace(bins[0], bins[-2], 1000), *param0),
+             color="darkmagenta", linestyle="dashed",
+             label=r"end_0 gaussian fit:""\n"" $\mu$="+str(round(param0[0],2))+", $\sigma$="+str(round(param0[1],2)))
+    plt.plot(np.linspace(bins[0], bins[-2], 1000), gaussian(np.linspace(bins[0], bins[-2], 1000), *param1),
+             color="darkblue", linestyle="dotted", 
+             label=r"end_1 gaussian fit:""\n"" $\mu$="+str(round(param1[0],2))+", $\sigma$="+str(round(param1[1],2)))
+    plt.title("Run "+str(run_number), fontsize=15)
+    plt.xlabel("Reconstructed energy [MeV]")
+    plt.ylabel("Number of events")
+    plt.legend()
+    
+    if save_plot==True:
+        plt.savefig(plot_folder+"reconstructed_energy.png", bbox_inches='tight')
+    
+    plt.show()
+    return param0, param1
