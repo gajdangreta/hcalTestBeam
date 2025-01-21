@@ -12,6 +12,7 @@ sys.path.append("../src")
 
 from data_prep import *
 from fitting_functions import *
+from energy_resolution import *
 
 def longitudinal_profile(run_df, run_number, plot_folder, save_plot=False):
     # generate the longitudinal shower profile of a run. 
@@ -32,7 +33,7 @@ def longitudinal_profile(run_df, run_number, plot_folder, save_plot=False):
     if save_plot==True:
         plt.savefig(plot_folder+"longitudinal_profile.png", bbox_inches='tight')
         
-    plt.show()
+    plt.close()
 
 def transverse_profile(run_df,plot_folder, save_plot=False):
     # generate the transverse shower profile of a run. 
@@ -59,7 +60,7 @@ def transverse_profile(run_df,plot_folder, save_plot=False):
             if save_plot==True:
                 Path(plot_folder+"transverse_profile").mkdir(parents=True, exist_ok=True)
                 plt.savefig(plot_folder+"transverse_profile/transverse_layer_"+str(l)+".png", bbox_inches='tight')
-            plt.show()
+            plt.close()
 
 def make_shower_profiles(run_df, mip_df, run_number, plot_folder):
     # generate and save both transverse and longitudinal shower profiles of a run
@@ -101,5 +102,32 @@ def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=Fa
     if save_plot==True:
         plt.savefig(plot_folder+"reconstructed_energy.png", bbox_inches='tight')
     
-    plt.show()
+    plt.close()
     return param0, param1
+
+def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, save_plot=False):
+    if exclude_high_energy==True:
+        param, perr, param_low, perr_low=linear_fit(result_df,end, True, low_result_df)
+    else:
+        param, perr=linear_fit(result_df,end)
+    
+    sample=np.linspace(0.1, 5, 1000)
+    mu="mu_end"+str(int(end))
+    sigma="sigma_end"+str(int(end))
+    colors=["magenta", "blue"]
+    plt.errorbar(result_df["beam_energy"], result_df[mu], result_df[sigma],
+             linestyle='', marker='o', color=colors[end], label="end_"+str(end), capsize=5)
+    plt.plot(sample, linear(sample, *param), color="gray",linestyle="--",
+         label=r"linear fit ""\n"" a="+str(round(param[0],3))+"$\pm$"+str('{:.2E}'.format(perr[0]))+
+         ",  b="+str(round(param[1],3))+"$\pm$"+str('{:.2E}'.format(perr[1])))
+    if exclude_high_energy==True:
+        plt.plot(sample, linear(sample, *param_low), color="black",
+                 label=r"linear fit w/o 4 GeV ""\n"" a="+str(round(param_low[0],3))+"$\pm$"+str('{:.2E}'.format(perr_low[0]))+
+                 ",  b="+str(round(param_low[1],3))+"$\pm$"+str('{:.2E}'.format(perr_low[1])))
+    plt.xlabel("Beam energy [GeV]")
+    plt.ylabel("Mean reconstructed energy [GeV]")
+    plt.legend()
+    if save_plot==True:
+        plt.savefig("../../plots/hcal_linearity_electron_end_"+str(end)+".png", bbox_inches='tight')
+    plt.close()
+    return
