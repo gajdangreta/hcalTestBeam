@@ -24,7 +24,7 @@ def import_data(calibration_folder, data_folder, run_number, is_it_pulsed=False)
     return pedestal_df,mip_df,run_df
 
 def drop_extra_pedestal_data(df):
-    # drops pedestal daata from merged dataframe. Only works on dataframes that have pedestal and run data merged.
+    # drops pedestal data from merged dataframe. Only works on dataframes that have pedestal and run data merged.
     df.drop(["pedestal_end0", "pedestal_end1",
              "pedestal_per_time_sample_end0","pedestal_per_time_sample_end1"], axis=1, inplace=True)
     return df
