@@ -78,7 +78,7 @@ def select_bars_with_data(run_df, pedestal_df, subtract_pedestal=False, is_it_pu
     if subtract_pedestal==True:
         merged_df=subtract_pedestals(merged_df, is_it_pulsed)
 
-    merged_df=drop_extra_pedestal_data(merged_df) # needs to be dropped regardless of subtraction, too much memory used otherwise
+    # merged_df=drop_extra_pedestal_data(merged_df) # needs to be dropped regardless of subtraction, too much memory used otherwise
     
     events_left=merged_df.pf_event.unique()
     print("Initial pedestal-based selection performed.")
