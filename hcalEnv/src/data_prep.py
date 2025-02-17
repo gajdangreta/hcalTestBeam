@@ -14,12 +14,12 @@ def import_data(calibration_folder, data_folder, run_number, is_it_pulsed=False)
     if is_it_pulsed==True:
         run_df=pd.read_csv(data_folder+"run_"+str(run_number)+"_pulse.csv", sep=',')
         run_df.drop(["pf_spill", "pf_ticks"], axis=1, inplace=True) # we never need these
-        run_df.drop(["toa_end0", "toa_end1"], axis=1, inplace=True) # unreliable guys, but we might need them in the future
+        # run_df.drop(["toa_end0", "toa_end1"], axis=1, inplace=True) # unreliable guys, but we might need them in the future
     
     else:
         run_df=pd.read_csv(data_folder+"run_"+str(run_number)+".csv", sep=',')
         run_df.drop(["pf_spill", "pf_ticks"], axis=1, inplace=True)
-        run_df.drop(["toa_end0", "toa_end1"], axis=1, inplace=True)
+        # run_df.drop(["toa_end0", "toa_end1"], axis=1, inplace=True)
         
     return pedestal_df,mip_df,run_df
 
@@ -78,7 +78,7 @@ def select_bars_with_data(run_df, pedestal_df, subtract_pedestal=False, is_it_pu
     if subtract_pedestal==True:
         merged_df=subtract_pedestals(merged_df, is_it_pulsed)
 
-    # merged_df=drop_extra_pedestal_data(merged_df) # needs to be dropped regardless of subtraction, too much memory used otherwise
+    merged_df=drop_extra_pedestal_data(merged_df) # needs to be dropped regardless of subtraction, too much memory used otherwise
     
     events_left=merged_df.pf_event.unique()
     print("Initial pedestal-based selection performed.")
