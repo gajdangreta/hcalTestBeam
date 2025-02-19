@@ -85,3 +85,12 @@ def select_bars_with_data(run_df, pedestal_df, subtract_pedestal=False, is_it_pu
     print("Events left: "+str(len(events_left)))
     print("\n")
     return merged_df
+
+def pulse_drop_extra_cols(run_df, is_it_pulsed=False):
+    if is_it_pulsed:
+        run_df.drop(list(run_df.filter(regex = 'adc_.?_end.?')), axis = 1, inplace = True)
+        run_df.drop(["Unnamed: 0"], axis=1, inplace=True)
+
+    run_df.drop(list(run_df.filter(regex = 'pedestal_.*')), axis = 1, inplace = True)
+    run_df.drop(["pf_event", "layer", "strip", "adc_mean_end0", "adc_mean_end1"], axis=1, inplace=True)
+    return run_df
