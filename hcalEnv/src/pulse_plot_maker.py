@@ -159,7 +159,7 @@ def plot_error_by_layer(run_df, is_relative,plot_folder, save_plot=False):
 def plot_error_by_bar(run_df, is_relative, plot_folder,save_plot=False):
     wavy, mistimed, spiky=make_bar_error_histogram(run_df, is_relative)
     ymax=max([max(wavy["event"]), max(mistimed["event"]), max(spiky["event"])])*1.05
-
+    plt.rcParams["figure.figsize"]=(12,3)
     for l in range(1,20):
         plt.suptitle("Layer: "+str(l), fontsize=20)
         
@@ -168,7 +168,10 @@ def plot_error_by_bar(run_df, is_relative, plot_folder,save_plot=False):
         plt.bar(helper_df.index,helper_df["event"],color="dodgerblue",alpha=0.5, label="Wavy")
         plt.xticks(helper_df.index)
         plt.xlabel("Bar")
-        plt.ylabel("Chance of error")
+        if is_relative:
+            plt.ylabel("Chance of error")
+        else:
+            plt.ylabel("Number of errors")
         plt.legend(fontsize=12, loc="upper left")
         plt.ylim(0,ymax)
         
