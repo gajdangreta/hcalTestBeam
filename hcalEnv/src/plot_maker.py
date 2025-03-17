@@ -105,7 +105,7 @@ def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=Fa
     plt.close()
     return param0, param1
 
-def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, save_plot=False):
+def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, save_plot=False, together=False):
     if exclude_high_energy==True:
         param, perr, param_low, perr_low=linear_fit(result_df,end, True, low_result_df)
     else:
@@ -126,8 +126,15 @@ def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, s
                  ",  b="+str(round(param_low[1],3))+"$\pm$"+str('{:.2E}'.format(perr_low[1])))
     plt.xlabel("Beam energy [GeV]")
     plt.ylabel("Mean reconstructed energy [GeV]")
-    plt.legend()
+    if together==True:
+        plt.legend(bbox_to_anchor=(1.04, 1), borderaxespad=0)
+    else:
+        plt.legend()
     if save_plot==True:
-        plt.savefig("../../plots/hcal_linearity_electron_end_"+str(end)+".png", bbox_inches='tight')
-    plt.close()
+        if together==False:
+            plt.savefig("../../plots/hcal_linearity_electron_end_"+str(end)+".png", bbox_inches='tight')
+            plt.close()
+        else:
+            if end==1:
+                plt.savefig("../../plots/hcal_linearity_electron.png", bbox_inches='tight')
     return
