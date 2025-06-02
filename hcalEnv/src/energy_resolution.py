@@ -13,12 +13,15 @@ sys.path.append("../src")
 from data_prep import *
 from fitting_functions import *
 
-def make_result_df(end_0_params, end_1_params, run_numbers, calibration_folder, exclude_high_energy=False):
+def make_result_df(end_0_params, end_1_params,end_0_errs, end_1_errs, run_numbers, calibration_folder, exclude_high_energy=False):
     run_info=pd.read_csv(calibration_folder+"/runs.csv", index_col="run_number").drop("Unnamed: 0", axis=1)
 
     params=pd.DataFrame(np.append(np.array(end_0_params),np.array(end_1_params), axis=1),
                         columns=["mu_end0", "sigma_end0", "mu_end1", "sigma_end1"])
     params["run_number"]=np.array(run_numbers)
+    params["mu_end0_err"]=np.array([row[0] for row in end_0_errs])
+    params["sigma_end0_err"]=np.array([row[1] for row in end_0_errs])
+    
     params.set_index(["run_number"], inplace=True)
     
     result_df=params.join(run_info, how='inner')
@@ -26,6 +29,9 @@ def make_result_df(end_0_params, end_1_params, run_numbers, calibration_folder, 
     result_df["mu_end1"]/=1000
     result_df["sigma_end0"]/=1000
     result_df["sigma_end1"]/=1000
+
+    result_df["mu_end0_err"]/=1000
+    result_df["sigma_end0_err"]/=1000
     if exclude_high_energy==True:
         low_result_df=result_df[result_df["beam_energy"]<=2]
         return result_df, low_result_df

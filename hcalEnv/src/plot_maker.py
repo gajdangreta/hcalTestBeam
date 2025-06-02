@@ -81,8 +81,12 @@ def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=Fa
 
     bin_fit=(bins[:-1] + bins[1:]) / 2
     
-    param0, _=curve_fit(gaussian,bin_fit, h0, p0=[mu_p0, 100,6000])
-    param1, _=curve_fit(gaussian,bin_fit, h1, p0=[mu_p0, 100,6000])
+    param0, pcov0 =curve_fit(gaussian,bin_fit, h0, p0=[mu_p0, 100,6000])
+    param1, pcov1 =curve_fit(gaussian,bin_fit, h1, p0=[mu_p0, 100,6000])
+
+    perr0=np.sqrt(np.diag(pcov0))
+    perr1=np.sqrt(np.diag(pcov1))
+
 
     #plt.bar(bins[:-1]-1.4, h0,width=2.4, align="edge", color="magenta", edgecolor="magenta", alpha=0.5, label="end_0")
     #plt.bar(bins[:-1]+1.4, h1,width=2.4, align="edge", color="blue", edgecolor="blue", alpha=0.5, label="end_1")
@@ -95,7 +99,7 @@ def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=Fa
              color="darkblue", linestyle="dotted", 
              label=r"end_1 gaussian fit:""\n"" $\mu$="+str(round(param1[0],2))+", $\sigma$="+str(round(param1[1],2)))
     plt.title("Run "+str(run_number), fontsize=15)
-    plt.xlabel("Reconstructed energy [MeV]")
+    plt.xlabel("Deposited energy [MeV]")
     plt.ylabel("Number of events")
     plt.legend()
     
@@ -103,7 +107,7 @@ def make_gaussian_fit_plot(run_df, mip_df, run_number, plot_folder, save_plot=Fa
         plt.savefig(plot_folder+"reconstructed_energy.png", bbox_inches='tight')
     
     plt.close()
-    return param0, param1
+    return param0, param1, perr0, perr1
 
 def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, save_plot=False, together=False):
     if exclude_high_energy==True:
@@ -118,14 +122,14 @@ def linear_plot(result_df, end, exclude_high_energy=False, low_result_df=None, s
     plt.errorbar(result_df["beam_energy"], result_df[mu], result_df[sigma],
              linestyle='', marker='o', color=colors[end], label="end_"+str(end), capsize=5)
     plt.plot(sample, linear(sample, *param), color="gray",linestyle="--",
-         label=r"linear fit ""\n"" a="+str(round(param[0],3))+"$\pm$"+str('{:.2E}'.format(perr[0]))+
+         label=r"linear fit (end "+str(end)+")""\n"" a="+str(round(param[0],3))+"$\pm$"+str('{:.2E}'.format(perr[0]))+
          ",  b="+str(round(param[1],3))+"$\pm$"+str('{:.2E}'.format(perr[1])))
     if exclude_high_energy==True:
         plt.plot(sample, linear(sample, *param_low), color="black",
-                 label=r"linear fit w/o 4 GeV ""\n"" a="+str(round(param_low[0],3))+"$\pm$"+str('{:.2E}'.format(perr_low[0]))+
+                 label=r"linear fit w/o 4 GeV (end "+str(end)+")""\n"" a="+str(round(param_low[0],3))+"$\pm$"+str('{:.2E}'.format(perr_low[0]))+
                  ",  b="+str(round(param_low[1],3))+"$\pm$"+str('{:.2E}'.format(perr_low[1])))
     plt.xlabel("Beam energy [GeV]")
-    plt.ylabel("Mean reconstructed energy [GeV]")
+    plt.ylabel("Mean deposited energy [GeV]")
     if together==True:
         plt.legend(bbox_to_anchor=(1.04, 1), borderaxespad=0)
     else:
